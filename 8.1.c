@@ -1,4 +1,4 @@
-// Amount System v2.0
+// Amount System v1.0
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +32,10 @@ int     num;
 // function for qsort
 int _void_strcmp(const void *s1, const void *s2) {
     return strcmp(((amount *) s2)->name, ((amount *) s1)->name);
+}
+
+int _void_int_cmp(const void *x1, const void *x2) {
+    return ((amount *) x1)->id - ((amount *) x2)->id;
 }
 
 // main function
@@ -85,7 +89,7 @@ int main(void) {
                    "0.Exit\n"
                    "  Please enter your choice:");
         } while ((scanf("%d", &input) != 1) || (input >= 7 || input < 0));
-        function[input](amounts, num);
+        function[input]();
     } while (1);
 
     return 0;
@@ -122,29 +126,53 @@ void Sort_and_list(void) {
         _list_records((amount *) ptr);
         free(ptr);
     } else
-        printf("Please input the datas firse.(choose 1).\n");
+        printf("Please input the datas first.(choose 1).\n");
 }
 void Search_records(void) {
+    /*
+     * Direct search
+     */
     if (amounts) {
         char _input_for_search[MAX_NAME_LENGTH];
-        int  i = 0;
+        int  i = 0, j = 0;
         printf("Please input the user name:");
         scanf("%*[^\n]");
         getchar();
         scanf("%10[^\n]", _input_for_search);
         for (i = 0; i < num; i++) {
             if (!strcmp(_input_for_search, amounts[i].name)) {
-                break;
+                j++;
+                if (j == 1) _list_beginning();
+                _print_list_text(amounts, i);
             }
         }
-        if (i < num) {
-            _list_beginning();
-            _print_list_text(amounts, i);
-            _list_ending();
-        } else
+        if (!j)
             printf("404 NOT FOUND\n");
+        else
+            _list_ending();
     } else
-        printf("Please input the datas firse.(choose 1).\n");
+        printf("Please input the datas first.(choose 1).\n");
+    /*
+     * Binary search,but can only output one of all the users who have the same
+     * name.
+     */
+    // if (amounts) {
+    //     amount  _input_for_search[1];
+    //     amount *item;
+    //     printf("Please input the user name:");
+    //     scanf("%*[^\n]");
+    //     getchar();
+    //     scanf("%10[^\n]", _input_for_search[0].name);
+    //     item = (amount *) bsearch(_input_for_search, amounts, num,
+    //                               sizeof(amount), _void_strcmp);
+    //     if (item != NULL) {
+    //         _list_beginning();
+    //         _print_list_text(item,0);
+    //         _list_ending();
+    //     } else
+    //         printf("404 NOT FOUND\n");
+    // } else
+    //     printf("Please input the datas first.(choose 1).\n");
 }
 
 void Calculate(void) {
@@ -157,7 +185,7 @@ void Calculate(void) {
         printf("Per capita income:	%.2f\n", _per_capita_income / num);
         printf("Per capita expenses:	%.2f\n", _per_capita_expenses / num);
     } else
-        printf("Please input the datas firse.(choose 1).\n");
+        printf("Please input the datas first.(choose 1).\n");
 }
 
 void List_more(void) {
@@ -175,14 +203,20 @@ void List_more(void) {
         }
         _list_ending();
     } else
-        printf("Please input the datas firse.(choose 1).\n");
+        printf("Please input the datas first.(choose 1).\n");
 }
 
 void List_all_records(void) {
     if (amounts) {
-        _list_records(amounts);
+        amount *ptr = (amount *) calloc(num, sizeof(amount));
+        for (int i = 0; i < num; i++) {
+            ptr[i] = amounts[i];
+        }
+        qsort(ptr, num, sizeof(amount), _void_int_cmp);
+        _list_records((amount *) ptr);
+        free(ptr);
     } else
-        printf("Please input the datas firse.(choose 1).\n");
+        printf("Please input the datas first.(choose 1).\n");
 }
 
 void Exit(void) {
